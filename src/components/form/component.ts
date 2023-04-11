@@ -2,6 +2,7 @@ import { ElAutocomplete, ElCascader, ElCheckbox, ElColorPicker, ElDatePicker, El
 import Select from '../select/index.vue'
 import CheckboxGroup from '../checkboxGroup/index.vue'
 import RadioGroup from '../radioGroup/index.vue'
+import Editor from '../editor/index.vue'
 export const forms = {
   autocomplete: ElAutocomplete,
   cascader: ElCascader,
@@ -19,5 +20,6 @@ export const forms = {
   switch: ElSwitch,
   timePicker: ElTimePicker,
   timeSelect: ElTimeSelect,
-  upload: ElUpload
+  upload: ElUpload,
+  editor: Editor,
 }

@@ -107,9 +107,11 @@ const onTableDelRow = (item: EmptyObjectType) => {
 	getTableData();
 };
 const onTableAdd = () => {
+	isUpdate.value = false
 	editEl.value?.handleAdd();
 }
 const onTableEdit = (item: EmptyObjectType) => {
+	isUpdate.value = true
 	editEl.value?.handleEdit(item.id);
 }
 // 分页改变时回调

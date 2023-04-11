@@ -1,5 +1,5 @@
 <template>
-  <Page v-bind="$attrs" @setting="setting">
+  <Page @setting="setting">
     <template #mail>
       测试
     </template>
@@ -12,6 +12,7 @@ import { ColumnKind, usePageApi } from '/@/api/page';
 const { setting, columns, forms } = usePageSetting({
   columns: [
     {
+      in: ColumnKind.ADD,
       prop: 'sex',
       component: 'radioGroup',
       props: {
@@ -19,6 +20,7 @@ const { setting, columns, forms } = usePageSetting({
       },
     },
     {
+      in: [ColumnKind.SEARCH, ColumnKind.LIST],
       prop: 'mail',
       slot: 'mail',
     },
