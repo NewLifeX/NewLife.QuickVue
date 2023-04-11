@@ -6,7 +6,7 @@
   </Page>
 </template>
 
-<script setup lang="ts" name="User">
+<script setup lang="ts">
 import usePageSetting from '/@/hook/usePageSetting'
 import { ColumnKind, usePageApi } from '/@/api/page';
 const { setting, columns, forms } = usePageSetting({
