@@ -2,7 +2,9 @@
 
 #### 介绍
 
-前端页面快速开发
+新生命魔方管理平台，基于 element-plus，vue-next-admin。
+
+在线地址：https://quickvue.newlifex.com/
 
 #### 项目架构
 
