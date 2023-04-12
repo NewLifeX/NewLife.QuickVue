@@ -26,11 +26,171 @@
 
 #### 使用说明
 
-1.  从接口读取到的路由默认使用 views/modules/index.vue 文件
-2.  在 views/modules 下面按照路由规则新建文件会自动引用
-3.  可参考 views/modules/admin/user/index 进行页面编写
-4.  page 组件可通过 usePageSetting 函数按照一定的规则进行页面配置
-    若组件不够可以增加组件，对于复杂组件支持使用自定义插槽渲染（通过配置项 slot）
+1.  view/modules/index 模板文件
+
+```javascript
+<template>
+  <Page></Page>
+</template>
+
+<script setup lang="ts">
+</script>
+```
+
+2.  usePageSetting 函数参数配置
+
+```javascript
+{
+    columns?: {
+        // 通用配置
+        // 修改哪个位置的配置，不传则全部修改
+        in?: ColumnKind | Array<ColumnKind>;
+        // 字段名
+        prop: string;
+        // 字段中文名称
+        label?: string;
+        // 组件
+        component?: keyof FormType;
+        // 是否渲染
+        if?: boolean;
+        // 是否显示
+        show?: boolean;
+        // 自定义组件插槽名称
+        slot?: string;
+        // 必填
+        required?: boolean;
+        // 组件参数
+        props?: ColumnProp<ColumnConfig['component']>;
+        // 校验规则
+        rules?: FormRule[];
+        // 排序下标
+        index?: number;
+        // 所占列数
+        col?: number | Col;
+
+        // 以下配置只用于表格
+        // 宽度
+        width?: string | number;
+        // 是否勾选显示
+        isCheck?: boolean;
+    }
+}
+```
+
+3.  usePageSetting 返回值
+
+```javascript
+{
+    // 回调函数，需要绑定在page组件的setting事件中
+    setting: Function;
+    // 响应式配置项
+    columns: {
+        table?: TableColumn[];
+        search?: ColumnConfig[];
+        add?: ColumnConfig[];
+        edit?: ColumnConfig[];
+        detail?: ColumnConfig[];
+    };
+    // 响应式表单值
+    forms: {
+        // 搜索区域表单
+        search?: EmptyObjectType;
+        // 添加、修改表单
+        data?: EmptyObjectType;
+    }
+}
+```
+
+4.  表单类型
+
+```javascript
+{
+	autocomplete: ElAutocomplete,
+	cascader: ElCascader,
+	checkbox: ElCheckbox,
+	checkboxGroup: CheckboxGroup, // 可配置api等参数
+	colorPicker: ElColorPicker,
+	datePicker: ElDatePicker,
+	input: ElInput,
+	inputNumber: ElInputNumber,
+	radioGroup: RadioGroup, // 可配置api等参数
+	radio: ElRadio,
+	rate: ElRate,
+	select: Select, // 可配置api等参数
+	slider: ElSlider,
+	switch: ElSwitch,
+	timePicker: ElTimePicker,
+	timeSelect: ElTimeSelect,
+	upload: ElUpload,
+	editor: Editor,
+}
+```
+
+5.  所在位置枚举
+
+```javascript
+{
+	(LIST = 1), DETAIL, ADD, EDIT, SEARCH;
+}
+```
+
+6.  修改配置示例代码
+
+```javascript
+<template>
+  <Page @setting="setting">
+    <template #mail>
+      测试
+    </template>
+  </Page>
+</template>
+
+<script setup lang="ts">
+import usePageSetting from '/@/hook/usePageSetting'
+import { ColumnKind, usePageApi } from '/@/api/page';
+const { setting, columns, forms } = usePageSetting({
+  columns: [
+    {
+      in: ColumnKind.ADD,
+      prop: 'sex',
+      component: 'radioGroup',
+      props: {
+        options: [{ id: 1, name: '男' }, { id: 2, name: '女' }]
+      },
+    },
+    {
+      in: [ColumnKind.SEARCH, ColumnKind.LIST],
+      prop: 'mail',
+      slot: 'mail',
+    },
+    {
+      prop: 'departmentID',
+      component: 'select',
+      props: {
+        api: () => usePageApi().getTableData('/admin/department', { pageIndex: 0 })
+      }
+    },
+    {
+      prop: 'roleID',
+      component: 'select',
+      props: {
+        url: '/admin/role'
+      }
+    },
+    {
+      in: [ColumnKind.ADD, ColumnKind.EDIT],
+      prop: 'name',
+      props: {
+        onChange: (val: string) => {
+          forms.data!.mail = val
+          columns.add!.find(item => item.prop === 'sex')!.if = !val
+        }
+      }
+    }
+  ]
+})
+</script>
+```
 
 #### 参与贡献
 
