@@ -4,7 +4,7 @@
 			<template #handle-after>
 				<el-button size="default" type="primary" @click="onAdd">添加 </el-button>
 			</template>
-			<template v-for="item in search.filter(item => item.slot)" :key="item.prop" #[`${item.slot}`]="data">
+			<template v-for="item in search.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
 				<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
 			</template>
 		</Search>
@@ -17,15 +17,15 @@
 			style="width: 100%"
 			v-loading="config.loading"
 			@selection-change="onSelectionChange">
-			<el-table-column type="selection" :reserve-selection="true" width="40" fixed="left" v-if="config.isSelection && setHeader.length" />
-			<el-table-column type="index" label="序号" width="60" v-if="config.isSerialNo && setHeader.length" />
-			<template v-for="(item, index) in setHeader" :key="index">
+			<el-table-column type="selection" :reserve-selection="true" width="40" fixed="left" v-if="config.isSelection && tableColumns.length" />
+			<el-table-column type="index" label="序号" width="60" v-if="config.isSerialNo && tableColumns.length" />
+			<template v-for="(item, index) in tableColumns" :key="index">
 				<el-table-column
 					show-overflow-tooltip
 					:prop="item.prop"
 					:width="item.width"
 					:label="item.label"
-					v-if="item.if === undefined || item.if"
+					v-if="(item.if === undefined || item.if) && (item.isCheck === undefined || item.isCheck)"
 				>
 					<template v-slot="scope">
 						<slot v-if="item.slot" :name="item.slot" :scope="scope" :model="scope.row" :prop="item.prop"></slot>
@@ -44,7 +44,7 @@
 					</template>
 				</el-table-column>
 			</template>
-			<el-table-column label="操作" width="100" fixed="right" v-if="config.isOperate && setHeader.length">
+			<el-table-column label="操作" width="100" fixed="right" v-if="config.isOperate && tableColumns.length">
 				<template v-slot="scope">
 					<el-button text type="primary" @click="onEdit(scope.row)">修改</el-button>
 					<el-popconfirm title="确定删除吗？" @confirm="onDel(scope.row)">
@@ -208,15 +208,19 @@ const getConfig = computed(() => {
 	return props.config;
 });
 // 设置 tool columns 数据
-const setHeader = computed(() => {
-	return props.columns.filter((v) => v.isCheck);
-});
-watch(() => props.columns, (val) => {
+// const setHeader = computed(() => {
+// 	// console.log('props.columns', props.columns)
+// 	return tableColumns.value.filter((v) => v.isCheck);
+// });
+watch(tableColumns, (val) => {
 	val.forEach(item => {
 		if (item.isCheck === undefined) {
 			item.isCheck = true
 		}
 	})
+}, {
+	deep: true,
+	immediate: true
 })
 // tool 列显示全选改变时
 const onCheckAllChange = <T>(val: T) => {

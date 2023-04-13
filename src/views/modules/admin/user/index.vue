@@ -20,7 +20,7 @@ const { setting, columns, forms } = usePageSetting({
       },
     },
     {
-      in: [ColumnKind.SEARCH, ColumnKind.LIST],
+      in: [ColumnKind.SEARCH, ColumnKind.LIST, ColumnKind.ADD],
       prop: 'mail',
       slot: 'mail',
     },

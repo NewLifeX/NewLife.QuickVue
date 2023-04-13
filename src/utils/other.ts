@@ -208,7 +208,7 @@ export function getFormConfigByFields (fields: Column[] = [], fun?: (item: Colum
 		}
 	}
 	return fields.map(item => ({
-    component: propTypes[item.typeName],
+    component: item.itemType || propTypes[item.typeName],
     label: item.displayName,
     prop: toCamelCase(item.mapField || item.name),
     props: propProps[item.typeName],

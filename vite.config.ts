@@ -29,7 +29,8 @@ const viteConfig = defineConfig((mode: ConfigEnv) => {
 			hmr: true,
 			proxy: {
 				'/base-api': {
-					target: 'https://cube.newlifex.com',
+					// target: 'https://cube.newlifex.com',
+					target: 'http://120.79.3.93:5000',
 					ws: true,
 					changeOrigin: true,
 					rewrite: (path) => path.replace(/^\/base-api/, ''),

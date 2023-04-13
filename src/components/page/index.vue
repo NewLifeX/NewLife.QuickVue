@@ -25,8 +25,11 @@
 			</Table>
 		</div>
 		<Edit ref="editEl" v-model:visible="editVisible" :type="type" wrapper="drawer" :config="isUpdate ? editConfig : addConfig" :key="type" v-model="editForm" :isUpdate="isUpdate" @submit-success="getTableData">
-			<template v-for="item in editConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot}`]="data">
-				<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
+			<template v-for="item in editConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
+				<slot v-if="isUpdate" :name="item.slot" :model="data.model" :prop="data.prop"></slot>
+			</template>
+			<template v-for="item in addConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
+				<slot v-if="!isUpdate" :name="item.slot" :model="data.model" :prop="data.prop"></slot>
 			</template>
 		</Edit>
 	</div>
@@ -90,7 +93,7 @@ const getTableData = () => {
 		}
 		if (res.page) {
 			pagerVisible.value = true
-			config.value.total = res.page.totalCount
+			config.value.total = Number(res.page.totalCount)
 		}
 		config.value.loading = false;
 	}).catch(() => {
