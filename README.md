@@ -76,6 +76,10 @@ https://antd.newlifex.com
         // 所占列数
         col?: number | Col;
 
+        // 一下配置只用于表单
+        // 分组
+        group?: string;
+
         // 以下配置只用于表格
         // 宽度
         width?: string | number;
