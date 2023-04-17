@@ -1,26 +1,25 @@
 <template>
-  <div v-loading="loading">
-    <Form :config="config" v-model="formData" v-model:visible="layoutVisible" :wrapper="wrapper" :title="isUpdate?'修改':'添加'" @submit="submit">
-      <template v-for="item in config.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
-				<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
-			</template>
-    </Form>
-  </div>
+  <Form :config="config" v-model="formData" v-model:visible="layoutVisible" :wrapper="wrapper" :title="myIsUpdate?'修改':'添加'" @submit="submit">
+    <template v-for="item in config.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
+      <slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
+    </template>
+  </Form>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { usePageApi } from '/@/api/page';
 import Form from '/@/components/form/index.vue';
 import { ColumnConfig } from '../form/model/form';
 import { ElMessage } from 'element-plus';
-import { EventSettingRef } from './model';
+import { EditWrapper } from './model';
 interface Props {
   type: string;
-  wrapper?: 'div' | 'dialog' | 'drawer';
+  wrapper?: EditWrapper;
   visible: boolean;
   modelValue?: EmptyObjectType;
   config: ColumnConfig[];
+  isUpdate?: boolean;
 }
 interface Emits {
   (e: 'update:visible', val: boolean): void;
@@ -48,19 +47,22 @@ const formData = computed({
     emits('update:modelValue', val)
   }
 });
-const isUpdate = ref(false);
+const myIsUpdate = ref(props.isUpdate);
+watch(() => props.isUpdate, (val) => {
+  myIsUpdate.value = val
+})
 const pageApi = usePageApi();
 
 const handleAdd = () => {
-  if (isUpdate.value) {
+  if (myIsUpdate.value) {
     formData.value = {}
   }
-  isUpdate.value = false;
+  myIsUpdate.value = false;
   layoutVisible.value = true;
 }
 const handleEdit = (id: number) => {
   formData.value = {}
-  isUpdate.value = true;
+  myIsUpdate.value = true;
   layoutVisible.value = true;
   loading.value = true
   pageApi.getTableDetail(props.type, id).then(res => {
@@ -71,7 +73,7 @@ const handleEdit = (id: number) => {
   })
 }
 const submit = () => {
-  const submitApi = isUpdate.value ? pageApi.setTableItem : pageApi.addTableItem
+  const submitApi = myIsUpdate.value ? pageApi.setTableItem : pageApi.addTableItem
   submitApi(props.type, formData.value).then(() => {
     ElMessage.success('保存成功！')
     emits('submitSuccess')

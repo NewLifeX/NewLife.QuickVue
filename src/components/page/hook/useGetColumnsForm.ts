@@ -45,11 +45,15 @@ export default function useGetColumnsForm (props: Props, emits: Emits) {
     emits('setting', { type: ColumnKind.LIST, config: columns })
   })
   pageApi.getColumns(props.type, ColumnKind.EDIT).then(res => {
-    editConfig.value = getFormConfigByFields(res.data)
+    editConfig.value = getFormConfigByFields(res.data, (item) => ({
+      group: item.category,
+    }))
     emits('setting', { type: ColumnKind.EDIT, config: editConfig, formData: editForm })
   })
   pageApi.getColumns(props.type, ColumnKind.ADD).then(res => {
-    addConfig.value = getFormConfigByFields(res.data)
+    addConfig.value = getFormConfigByFields(res.data, (item) => ({
+      group: item.category,
+    }))
     emits('setting', { type: ColumnKind.ADD, config: addConfig, formData: editForm })
   })
 

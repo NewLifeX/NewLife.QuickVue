@@ -200,7 +200,9 @@ export function getFormConfigByFields (fields: Column[] = [], fun?: (item: Colum
 		Int64: 'inputNumber',
 		String: 'input',
 		Boolean: 'switch',
-		DateTime: 'datePicker'
+		DateTime: 'datePicker',
+		mail: 'input',
+		mobile: 'input'
 	}
 	const propProps = {
 		DateTime: {
@@ -208,7 +210,7 @@ export function getFormConfigByFields (fields: Column[] = [], fun?: (item: Colum
 		}
 	}
 	return fields.map(item => ({
-    component: item.itemType || propTypes[item.typeName],
+    component: propTypes[item.itemType || item.typeName] || 'input',
     label: item.displayName,
     prop: toCamelCase(item.mapField || item.name),
     props: propProps[item.typeName],

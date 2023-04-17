@@ -3,6 +3,8 @@ import { ColumnConfig } from "../../form/model/form";
 import { TableColumn } from "../../table/type";
 import { ColumnKind } from "/@/api/page";
 
+export type EditWrapper = 'div' | 'dialog' | 'drawer';
+
 export interface TableDemoState {
 	tableData: {
 		data: EmptyObjectType[];

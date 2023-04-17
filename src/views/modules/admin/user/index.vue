@@ -19,11 +19,11 @@ const { setting, columns, forms } = usePageSetting({
         options: [{ id: 1, name: '男' }, { id: 2, name: '女' }]
       },
     },
-    {
-      in: [ColumnKind.SEARCH, ColumnKind.LIST, ColumnKind.ADD],
-      prop: 'mail',
-      slot: 'mail',
-    },
+    // {
+    //   in: [ColumnKind.SEARCH, ColumnKind.LIST, ColumnKind.ADD],
+    //   prop: 'mail',
+    //   slot: 'mail',
+    // },
     {
       prop: 'departmentID',
       component: 'select',
@@ -38,16 +38,16 @@ const { setting, columns, forms } = usePageSetting({
         url: '/admin/role'
       }
     },
-    {
-      in: [ColumnKind.ADD, ColumnKind.EDIT],
-      prop: 'name',
-      props: {
-        onChange: (val: string) => {
-          forms.data!.mail = val
-          columns.add!.find(item => item.prop === 'sex')!.if = !val
-        }
-      }
-    }
+    // {
+    //   in: [ColumnKind.ADD, ColumnKind.EDIT],
+    //   prop: 'name',
+    //   props: {
+    //     onChange: (val: string) => {
+    //       forms.data!.mail = val
+    //       columns.add!.find(item => item.prop === 'sex')!.if = !val
+    //     }
+    //   }
+    // }
   ]
 })
 </script>

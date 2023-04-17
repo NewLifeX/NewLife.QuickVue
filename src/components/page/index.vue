@@ -1,7 +1,8 @@
 <template>
 	<div class="table-demo-container layout-padding">
-		<div class="table-demo-padding layout-padding-view layout-padding-auto">
+		<div class="table-demo-padding layout-padding-view layout-padding-auto h-full">
 			<Table
+				v-if="wrapper !== 'div'"
 				ref="tableRef"
 				:data="data"
 				:config="config"
@@ -16,22 +17,22 @@
 				@edit="onTableEdit"
 				@search="onSearch"
 				@sortHeader="onSortHeader">
-				<template v-for="item in search.filter(v => v.slot)" :key="item.prop" #[`${item.slot}`]="data">
+				<template v-for="item in search.filter(v => v.slot)" :key="item.prop" #[`${item.slot!}`]="data">
 					<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
 				</template>
-				<template v-for="item in columns.filter(v => v.slot)" :key="item.prop" #[`${item.slot}`]="data">
+				<template v-for="item in columns.filter(v => v.slot)" :key="item.prop" #[`${item.slot!}`]="data">
 					<slot :name="item.slot" :scope="data.scope"></slot>
 				</template>
 			</Table>
+			<Edit ref="editEl" v-model:visible="editVisible" :type="type" :wrapper="wrapper" :config="isUpdate ? editConfig : addConfig" :key="type" v-model="editForm" :isUpdate="isUpdate" @submit-success="getTableData">
+				<template v-for="item in editConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
+					<slot v-if="isUpdate" :name="item.slot" :model="data.model" :prop="data.prop"></slot>
+				</template>
+				<template v-for="item in addConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
+					<slot v-if="!isUpdate" :name="item.slot" :model="data.model" :prop="data.prop"></slot>
+				</template>
+			</Edit>
 		</div>
-		<Edit ref="editEl" v-model:visible="editVisible" :type="type" wrapper="drawer" :config="isUpdate ? editConfig : addConfig" :key="type" v-model="editForm" :isUpdate="isUpdate" @submit-success="getTableData">
-			<template v-for="item in editConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
-				<slot v-if="isUpdate" :name="item.slot" :model="data.model" :prop="data.prop"></slot>
-			</template>
-			<template v-for="item in addConfig.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
-				<slot v-if="!isUpdate" :name="item.slot" :model="data.model" :prop="data.prop"></slot>
-			</template>
-		</Edit>
 	</div>
 </template>
 
@@ -41,12 +42,13 @@ import { ElMessage } from 'element-plus';
 import { usePageApi } from '../../api/page';
 import Edit from './edit.vue';
 import { TableColumn } from '../table/type';
-import { EventSettingRef } from './model';
+import { EditWrapper, EventSettingRef } from './model';
 import useGetColumnsForm from './hook/useGetColumnsForm';
 
 interface Props {
 	type: string;
 	searchData?: EmptyObjectType;
+	editWrapper?: EditWrapper;
 }
 interface Emits {
 	(e: 'update:searchData', val: EmptyObjectType): void;
@@ -60,7 +62,7 @@ const pageApi = usePageApi()
 const editVisible = ref(false);
 // 引入组件
 const Table = defineAsyncComponent(() => import('/@/components/table/index.vue'));
-
+const wrapper = ref<EditWrapper>(props.editWrapper || 'drawer');
 // 初始化配置项数据与表单数据
 const { searchForm, editForm, editConfig, addConfig, search, columns } = useGetColumnsForm(props, emits)
 
@@ -90,6 +92,10 @@ const getTableData = () => {
 	pageApi.getTableData(props.type, { ...param.value, ...searchForm.value }).then(res => {
 		if (Array.isArray(res.data)) {
 			data.value = res.data || []
+		} else if (typeof res.data === 'object') {
+			wrapper.value = 'div'
+			editForm.value = res.data
+			isUpdate.value = true
 		}
 		if (res.page) {
 			pagerVisible.value = true

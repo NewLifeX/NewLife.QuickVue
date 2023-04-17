@@ -29,6 +29,8 @@ export interface ColumnConfig {
   index?: number;
   // 所占列数
 	col?: number | Col;
+  // 所属分组
+	group?: string;
   // isCheck?: boolean;
 }
 

@@ -1,11 +1,18 @@
 <template>
-  <component :is="layoutComponent" v-bind="layoutBind" v-model="layoutVisible" class="form-wrapper">
+  <component :is="layoutComponent" v-bind="layoutBind" v-model="layoutVisible" class="form-wrapper" :class="{'h-full': wrapper !== 'dialog'}">
     <div class="h-full flex flex-col overflow-auto form-body">
+      <el-tabs type="border-card" :class="{'border-t-0': wrapper === 'drawer'}" v-model="activeName" v-if="tabs.length">
+        <el-tab-pane :name="item" :key="item" v-for="item in tabs">
+          <template #label>
+            {{ item || '常规' }}
+          </template>
+        </el-tab-pane>
+      </el-tabs>
       <div class="flex-1 overflow-auto p-4">
-        <el-form ref="formEl" :model="formValue" size="default" label-width="100px" class="table-form">
+        <el-form ref="formEl" :model="formValue" size="default" label-width="120px" class="table-form">
           <el-row>
             <template v-for="(item, key) in config" :key="key">
-              <el-col v-bind="getColBind(item.col)" v-if="item.if === undefined ? true : item.if" v-show="item.show === undefined ? true : item.show">
+              <el-col v-bind="getColBind(item.col)" v-if="item.if === undefined ? true : item.if" v-show="getItemVShow(item)">
                 <el-form-item
                   class="form-item"
                   :label="item.label"
@@ -21,11 +28,13 @@
           </el-row>
         </el-form>
       </div>
-      <div class="p-4 flex justify-end border-t" v-if="handleVisible">
+      <div class="p-4 border-t text-right" v-if="handleVisible" :style="{textAlign: handlePosition || (wrapper === 'div' ? 'center' : 'right')}">
+        <!-- <el-button @click="back" v-if="tabs.length && activeName !== tabs[0]">上一步</el-button>
+        <el-button @click="next" v-if="tabs.length && activeName !== tabs[tabs.length - 1]">下一步</el-button> -->
+        <el-button v-if="cancelVisible && wrapper !== 'div'" @click="cancel">取消</el-button>
         <el-button type="primary" @click="submit">
           保存
         </el-button>
-        <el-button @click="cancel">取消</el-button>
       </div>
     </div>
   </component>
@@ -38,14 +47,19 @@ import { ColumnConfig } from './model/form';
 import useFormWrapper from './hooks/useFormWrapper';
 // import { WrapperEmits, WrapperProps } from './model/wrapper';
 import useForm from './hooks/useForm';
+import { EditWrapper } from '../page/model';
+import { computed, ref, watch } from 'vue';
 
 interface Props {
-  wrapper?: 'div' | 'dialog' | 'drawer';
+  wrapper?: EditWrapper;
   title?: string;
   visible?: boolean;
   config: ColumnConfig[];
   modelValue: EmptyObjectType;
   handleVisible?: boolean;
+  handlePosition?: 'center' | 'left' | 'right';
+  cancelVisible?: boolean;
+  groups?: Array<string>;
 }
 interface Emits {
   (e: 'update:visible', val: boolean): void;
@@ -59,12 +73,39 @@ const props = withDefaults(defineProps<Props>(), {
   config: () => [],
   modelValue: () => ({}),
   handleVisible: true,
+  cancelVisible: true,
 });
 const emits = defineEmits<Emits>();
 
 const { layoutComponent, layoutBind, layoutVisible } = useFormWrapper(props, emits);
 const { formEl, formValue, onChange, getColBind } = useForm(props, emits)
 
+const activeName = ref('');
+const tabs = computed(() => {
+  let groups = props.groups || [...new Set(props.config.map(item => item.group))]
+  if (!groups.length || (groups.length === 1 && !groups[0])) {
+    return []
+  }
+  return groups
+})
+watch(tabs, (val) => {
+  if(val[0]) {
+    activeName.value = val[0]
+  }
+}, {
+  immediate: true
+})
+// const next = () => {
+//   activeName.value = tabs.value[tabs.value.findIndex(name => name === activeName.value) + 1]!
+// }
+// const back = () => {
+//   activeName.value = tabs.value[tabs.value.findIndex(name => name === activeName.value) - 1]!
+// }
+
+const getItemVShow = (item: ColumnConfig) => {
+  const show = item.show === undefined ? true : item.show
+  return tabs.value.length ? item.group === activeName.value && show : show
+}
 const submit = async () => {
   if (!formEl.value) return
   await formEl.value.validate((valid, fields) => {
@@ -102,6 +143,15 @@ defineExpose({
     .form-body {
       max-height: calc(90vh - 111px) !important;
     }
+  }
+  .el-tabs__content {
+    display: none;
+  }
+  .el-tabs__header {
+    border-bottom: 0;
+  }
+  .el-tabs {
+    padding-bottom: 1px;
   }
 }
 </style>

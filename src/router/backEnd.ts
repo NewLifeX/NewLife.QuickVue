@@ -212,9 +212,9 @@ export function backEndComponent(routes: Menu[]): Array<RouteRecordRaw> {
 		const component = modules[`../views/modules${url}.vue`] || modules[`../views/modules${url}/index.vue`]
 		return {
 			path: url,
-			name: item.name,
+			name: url,
 			// component: component || dynamicImport(dynamicViewsModules, 'modules/index') as never,
-			component: createCustomComponent(item.name, component ? component() : modules['../views/modules/index.vue']()),
+			component: createCustomComponent(url, component ? component() : modules['../views/modules/index.vue']()),
 			props: { type: url },
 			meta: {
 				title: item.displayName,
