@@ -76,7 +76,7 @@ https://antd.newlifex.com
         // 所占列数
         col?: number | Col;
 
-        // 一下配置只用于表单
+        // 以下配置只用于表单
         // 分组
         group?: string;
 
