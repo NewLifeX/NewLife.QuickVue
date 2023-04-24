@@ -10,7 +10,7 @@
 		<template v-for="val in menuLists">
 			<el-sub-menu :index="val.path" v-if="val.children && val.children.length > 0" :key="val.path">
 				<template #title>
-					<SvgIcon v-if="val.meta.icon" class="iconfont" :name="val.meta.icon" />
+					<SvgIcon v-if="val.meta.icon" class="iconfont overflow-visible" :name="val.meta.icon" />
 					<span>{{ $t(val.meta.title) }}</span>
 				</template>
 				<SubItem :chil="val.children" />

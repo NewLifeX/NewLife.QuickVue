@@ -25,3 +25,11 @@ export interface TableColumn {
   // 是否渲染
   if?: boolean;
 }
+
+export enum Auth {
+  'LOOK' = 1,
+  'ADD' = 2,
+  'SET' = 4,
+  'DEL' = 8,
+  'ALL' = 255,
+}

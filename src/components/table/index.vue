@@ -2,7 +2,7 @@
 	<div class="table-container">
 		<Search :search="search" @search="onSearch" v-model="searchDataRef">
 			<template #handle-after>
-				<el-button size="default" type="primary" @click="onAdd">添加 </el-button>
+				<el-button v-auths="getBtnAuth(Auth.ADD)" size="default" type="primary" @click="onAdd">添加 </el-button>
 			</template>
 			<template v-for="item in search.filter(item => item.slot)" :key="item.prop" #[`${item.slot!}`]="data">
 				<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
@@ -44,12 +44,16 @@
 					</template>
 				</el-table-column>
 			</template>
-			<el-table-column label="操作" width="100" fixed="right" v-if="config.isOperate && tableColumns.length">
+			<el-table-column
+				v-if="config.isOperate && tableColumns.length && auths(getBtnAuth(Auth.SET, Auth.DEL))"
+				label="操作"
+				:width="operateWidth"
+				fixed="right">
 				<template v-slot="scope">
-					<el-button text type="primary" @click="onEdit(scope.row)">修改</el-button>
+					<el-button v-auths="getBtnAuth(Auth.SET)" text type="primary" @click="onEdit(scope.row)">修改</el-button>
 					<el-popconfirm title="确定删除吗？" @confirm="onDel(scope.row)">
 						<template #reference>
-							<el-button text type="danger">删除</el-button>
+							<el-button v-auths="getBtnAuth(Auth.DEL)" text type="danger">删除</el-button>
 						</template>
 					</el-popconfirm>
 				</template>
@@ -138,15 +142,17 @@ import { useThemeConfig } from '/@/stores/themeConfig';
 import '/@/theme/tableTool.scss';
 import Search from './search.vue';
 import { ColumnConfig } from '../form/model/form';
-import { TableColumn } from './type';
+import { Auth, TableColumn } from './type';
 import draggable from 'vuedraggable'
 import { useVModel } from '@vueuse/core';
+import { auths } from '/@/utils/authFunction';
 // import useVModel from '/@/hook/useVModel';
 interface Param {
 	pageIndex?: number;
 	pageSize?: number;
 }
 interface Props {
+	authId?: number;
 	data: EmptyObjectType[];
 	columns: TableColumn[];
 	config: TableConfigType;
@@ -175,6 +181,12 @@ const props = withDefaults(defineProps<Props>(), {
 	pagerVisible: true,
 	searchData: () => ({})
 });
+
+const operateWidth = computed(() => {
+	if (props.config.operateWidth)
+		return props.config.operateWidth
+	return (auths(getBtnAuth(Auth.SET)) ? 55 : 0) + (auths(getBtnAuth(Auth.DEL)) ? 55 : 0)
+})
 
 // 定义子组件向父组件传值/事件
 const emit = defineEmits(['del', 'edit', 'add', 'search', 'sortHeader', 'update:searchData', 'update:columns']);
@@ -297,6 +309,12 @@ const onSearch = (data: EmptyObjectType) => {
 	state.page = Object.assign({}, state.page, { ...data });
 	pageReset();
 };
+const getBtnAuth = (...auths: Auth[]) => {
+	if (props.authId) {
+		return [props.authId + '#' + Auth.ALL, ...auths.map(val => props.authId + '#' + val)]
+	}
+	return []
+}
 
 // 暴露变量
 defineExpose({

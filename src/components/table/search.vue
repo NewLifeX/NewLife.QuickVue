@@ -1,6 +1,6 @@
 <template>
-	<div class="table-search-container" v-if="props.search.length > 0">
-		<Form ref="formRef" v-model="formData" :config="config" class="table-form" :handleVisible="false">
+	<div class="table-search-container">
+		<Form ref="formRef" v-model="formData" :config="config" class="table-form" :handleVisible="false" v-if="search.length">
 			<template #form-after>
 				<el-col class="!flex-1 !max-w-none">
 					<el-form-item class="table-form-btn" :label-width="search.length <= 1 ? '10px' : '100px'">
@@ -10,7 +10,7 @@
 								<SvgIcon :name="state.isToggle ? 'ele-ArrowUp' : 'ele-ArrowDown'" />
 							</div>
 						</template>
-						<div class="flex justify-between w-full">
+						<div class="flex justify-between w-full ml-10">
 							<div>
 								<el-button size="default" type="primary" @click="onSearch">查询 </el-button>
 								<el-button size="default" type="info" class="ml10" @click="onReset"> 重置 </el-button>
@@ -26,6 +26,9 @@
 				<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
 			</template>
 		</Form>
+		<div v-else class="flex justify-end w-full mb-2">
+			<slot name="handle-after"></slot>
+		</div>
 	</div>
 </template>
 

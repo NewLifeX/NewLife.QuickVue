@@ -4,6 +4,7 @@
 			<Table
 				v-if="wrapper !== 'div'"
 				ref="tableRef"
+				:authId="authId"
 				:data="data"
 				:config="config"
 				v-model:columns="columns"
@@ -47,8 +48,10 @@ import useGetColumnsForm from './hook/useGetColumnsForm';
 
 interface Props {
 	type: string;
+	authId?: number;
 	searchData?: EmptyObjectType;
 	editWrapper?: EditWrapper;
+	tableConfig?: TableConfigType;
 }
 interface Emits {
 	(e: 'update:searchData', val: EmptyObjectType): void;
@@ -79,6 +82,7 @@ const config = ref<TableConfigType>({
 	isSerialNo: false, // 是否显示表格序号
 	isSelection: true, // 是否显示表格多选
 	isOperate: true, // 是否显示表格操作栏
+	...props.tableConfig
 })
 const param = ref({
 	pageIndex: 1,

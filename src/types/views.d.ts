@@ -309,6 +309,7 @@ interface TableConfigType {
   isSerialNo: boolean;
   isSelection: boolean;
   isOperate: boolean;
+	operateWidth?: number;
 }
 
 // declare type TableDemoState = {

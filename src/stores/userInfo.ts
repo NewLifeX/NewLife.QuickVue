@@ -33,7 +33,7 @@ export const useUserInfo = defineStore('userInfo', {
 		async getApiUserInfo() {
 			return new Promise((resolve) => {
 				userApi.info().then(res => {		
-					let defaultBtnRoles: Array<string> = res.data.permission.split(',');
+					let defaultBtnRoles: Array<string> = ['2#8', '2#255', ...res.data.permission.split(',')];
 					// let defaultAuthBtnList: Array<string> = [];
 					const userInfos = {
 						userName: res.data.name,

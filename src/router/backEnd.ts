@@ -215,7 +215,7 @@ export function backEndComponent(routes: Menu[]): Array<RouteRecordRaw> {
 			name: url,
 			// component: component || dynamicImport(dynamicViewsModules, 'modules/index') as never,
 			component: createCustomComponent(url, component ? component() : modules['../views/modules/index.vue']()),
-			props: { type: url },
+			props: { type: url, authId: item.id },
 			meta: {
 				title: item.displayName,
 				isLink: "",

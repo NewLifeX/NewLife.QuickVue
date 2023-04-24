@@ -109,3 +109,5 @@ declare interface TableType<T = any> {
 		[key: string]: T;
 	};
 }
+
+type ReverseMap<T> = T[keyof T];
