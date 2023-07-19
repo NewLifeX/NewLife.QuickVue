@@ -43,7 +43,7 @@ import { ElMessage } from 'element-plus';
 import { usePageApi } from '../../api/page';
 import Edit from './edit.vue';
 import { TableColumn } from '../table/type';
-import { EditWrapper, EventSettingRef } from './model';
+import { EditWrapper } from './model';
 import useGetColumnsForm from './hook/useGetColumnsForm';
 
 interface Props {
@@ -55,7 +55,6 @@ interface Props {
 }
 interface Emits {
 	(e: 'update:searchData', val: EmptyObjectType): void;
-	(e: 'setting', val: EventSettingRef): void;
 }
 const props = withDefaults(defineProps<Props>(), {
 	searchData: () => ({})

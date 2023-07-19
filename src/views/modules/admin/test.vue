@@ -1,11 +1,11 @@
 <template>
-  <Page @setting="setting"></Page>
+  <Page></Page>
 </template>
 
 <script setup lang="ts">
 import usePageSetting from '/@/hook/usePageSetting';
 
-const { setting } = usePageSetting({
+usePageSetting({
   columns: [
     {
       prop: 'enable',

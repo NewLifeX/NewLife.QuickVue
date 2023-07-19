@@ -1,8 +1,9 @@
-import { ElAutocomplete, ElCascader, ElCheckbox, ElColorPicker, ElDatePicker, ElDivider, ElInput, ElInputNumber, ElRadio, ElRate, ElSlider, ElSwitch, ElTimePicker, ElTimeSelect, ElUpload } from "element-plus";
+import { ElAutocomplete, ElCascader, ElCheckbox, ElColorPicker, ElDatePicker, ElDivider, ElInput, ElInputNumber, ElRadio, ElRate, ElSlider, ElSwitch, ElTimePicker, ElTimeSelect } from "element-plus";
 import Select from '../select/index.vue'
 import CheckboxGroup from '../checkboxGroup/index.vue'
 import RadioGroup from '../radioGroup/index.vue'
 import Editor from '../editor/index.vue'
+import Upload from '../upload/index.vue'
 export const forms = {
   autocomplete: ElAutocomplete,
   cascader: ElCascader,
@@ -20,7 +21,7 @@ export const forms = {
   switch: ElSwitch,
   timePicker: ElTimePicker,
   timeSelect: ElTimeSelect,
-  upload: ElUpload,
   editor: Editor,
   divider: ElDivider,
+  upload: Upload,
 }

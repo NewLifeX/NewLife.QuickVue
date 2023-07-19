@@ -58,6 +58,15 @@ service.interceptors.response.use(
 		if (error.response.status === 401) {
 			Session.clear(); // 清除浏览器全部临时缓存
 			window.location.href = '/'; // 去登录页
+		} else if (error.response.status === 403) {
+			Session.clear(); // 清除浏览器全部临时缓存
+			ElMessageBox.alert('暂无权限，请登录其他账号', '提示', {})
+			.then(() => {
+					window.location.href = '/'; // 去登录页
+				})
+				.catch(() => {
+					window.location.href = '/'; // 去登录页
+				});
 		} else if (error.message.indexOf('timeout') != -1) {
 			ElMessage.error('网络超时');
 		} else if (error.message == 'Network Error') {

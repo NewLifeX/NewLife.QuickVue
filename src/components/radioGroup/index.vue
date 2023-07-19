@@ -9,18 +9,8 @@
 
 <script setup lang="ts">
 import useOptions from '/@/hook/useOptions';
-interface Props {
-  options?: Array<EmptyObjectType>;
-  valueKey?: string;
-  labelKey?: string;
-  resultKey?: string;
-  api?: () => Promise<EmptyObjectType | Array<EmptyObjectType>>;
-  url?: string;
-}
-const props = withDefaults(defineProps<Props>(), {
-  valueKey: 'id',
-  labelKey: 'name',
-  resultKey: 'data',
-});
+import { optionProps } from '/@/utils/optionProps';
+
+const props = defineProps(optionProps);
 const { myOptions } = useOptions(props)
 </script>

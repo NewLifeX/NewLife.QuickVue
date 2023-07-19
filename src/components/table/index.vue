@@ -38,9 +38,12 @@
 								<Icon v-else icon="material-symbols:close" class="text-lg"></Icon>
 							</el-tag>
 						</template>
-						<template v-else>
-							{{ scope.row[item.prop] }}
+						<template v-else-if="item.props?.storeKey">
+							{{ options[item.props.storeKey]?.find(option => option.value === scope.row[item.prop])?.label }}
 						</template>
+						<!-- <template v-else>
+							{{ scope.row[item.prop] }}
+						</template> -->
 					</template>
 				</el-table-column>
 			</template>
@@ -146,6 +149,7 @@ import { Auth, TableColumn } from './type';
 import draggable from 'vuedraggable'
 import { useVModel } from '@vueuse/core';
 import { auths } from '/@/utils/authFunction';
+import { useEnumOptions } from '/@/stores/enumOptions';
 // import useVModel from '/@/hook/useVModel';
 interface Param {
 	pageIndex?: number;
@@ -181,6 +185,8 @@ const props = withDefaults(defineProps<Props>(), {
 	pagerVisible: true,
 	searchData: () => ({})
 });
+
+const { options } = useEnumOptions()
 
 const operateWidth = computed(() => {
 	if (props.config.operateWidth)

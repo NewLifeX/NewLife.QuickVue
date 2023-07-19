@@ -17,7 +17,9 @@ export interface TableColumn {
   // 是否必填
 	required?: boolean;
   // 参数
-	props?: ColumnProp<TableColumn['component']>;
+	props?: {
+    [k in string]: any;
+  } & ColumnProp<TableColumn['component']>;
   // 规则
   rules?: FormRule[];
   // 排序下标

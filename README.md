@@ -93,23 +93,15 @@ https://antd.newlifex.com
 
 ```javascript
 {
-    // 回调函数，需要绑定在page组件的setting事件中
-    setting: Function;
-    // 响应式配置项
-    columns: {
-        table?: TableColumn[];
-        search?: ColumnConfig[];
-        add?: ColumnConfig[];
-        edit?: ColumnConfig[];
-        detail?: ColumnConfig[];
-    };
-    // 响应式表单值
-    forms: {
-        // 搜索区域表单
-        search?: EmptyObjectType;
-        // 添加、修改表单
-        data?: EmptyObjectType;
-    }
+  // 配置相关
+  tableColumns: Ref<TableColumn[]>;
+  searchColumns: Ref<ColumnConfig[]>;
+  editColumns: Ref<ColumnConfig[]>;
+  addColumns: Ref<ColumnConfig[]>;
+  detailColumns: Ref<ColumnConfig[]>;
+  // 表单相关
+  searchForm: Ref<EmptyObjectType>;
+  infoForm: Ref<EmptyObjectType>;
 }
 ```
 
@@ -150,7 +142,7 @@ https://antd.newlifex.com
 
 ```javascript
 <template>
-  <Page @setting="setting">
+  <Page>
     <template #mail>
       测试
     </template>
@@ -160,7 +152,7 @@ https://antd.newlifex.com
 <script setup lang="ts">
 import usePageSetting from '/@/hook/usePageSetting'
 import { ColumnKind, usePageApi } from '/@/api/page';
-const { setting, columns, forms } = usePageSetting({
+const { columns, forms } = usePageSetting({
   columns: [
     {
       in: ColumnKind.ADD,

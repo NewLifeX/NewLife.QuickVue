@@ -1,12 +1,12 @@
 <template>
-  <Page @setting="setting"></Page>
+  <Page></Page>
 </template>
 
 <script setup lang="ts">
 import { ColumnKind } from '/@/api/page';
 import usePageSetting from '/@/hook/usePageSetting';
 
-const { setting } = usePageSetting({
+const { tableColumns } = usePageSetting({
   columns: [
     {
       in: ColumnKind.ADD,
@@ -19,4 +19,5 @@ const { setting } = usePageSetting({
     }
   ]
 })
+console.log('tableColumns', tableColumns)
 </script>

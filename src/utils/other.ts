@@ -12,6 +12,8 @@ import { Column } from '../model/api/page';
 import { ColumnConfig } from '../components/form/model/form';
 import { TableColumn } from '../components/table/type';
 import { h } from 'vue'
+import { usePageApi } from '../api/page';
+import { useEnumOptions } from '../stores/enumOptions';
 
 // 引入组件
 const SvgIcon = defineAsyncComponent(() => import('/@/components/svgIcon/index.vue'));
@@ -190,32 +192,53 @@ export function toCamelCase(str = '') {
 			return match.toLowerCase();
 		});
 }
-/**
- * 通过表配置获取表单配置
- * @param fields 配置项列表
- */
-export function getFormConfigByFields (fields: Column[] = [], fun?: (item: Column) => EmptyObjectType) {
-	const propTypes = {
+export function getComponentBaseField (item: Column) {
+	const { typeName, itemType } = item;
+	const types = {
 		Int32: 'inputNumber',
 		Int64: 'inputNumber',
 		String: 'input',
 		Boolean: 'switch',
 		DateTime: 'datePicker',
+	}
+	const contents = {
 		mail: 'input',
-		mobile: 'input'
+		mobile: 'input',
+		image: 'upload'
 	}
-	const propProps = {
-		DateTime: {
-			type: 'datetime'
-		}
+	if (typeName && !types[typeName]) {
+		useEnumOptions().setOptions(typeName)
 	}
-	return fields.map(item => ({
-    component: propTypes[item.itemType || item.typeName] || 'input',
-    label: item.displayName,
-    prop: toCamelCase(item.mapField || item.name),
-    props: propProps[item.typeName],
-		...(fun ? fun(item) : {})
-  }))
+	return {
+		component: contents[itemType] || types[typeName] || (typeName ? 'select' : 'input'),
+		label: item.displayName,
+		prop: toCamelCase(item.mapField || item.name),
+		props: typeName && !types[typeName] ? {
+			storeKey: typeName,
+			valueKey: 'value',
+			labelKey: 'label',
+		} : {}
+	}
+}
+
+export function getInfoFields (fields: Column[] = []) {
+	return fields.map(item => deepMerge(getComponentBaseField(item), {
+		group: item.category,
+	}))
+}
+
+export function getSearchFields (fields: Column[] = []) {
+  const col = { xs: 24, sm: 12, md: 8, lg: 8, xl: 6 }
+	return fields.map(item => deepMerge(getComponentBaseField(item), {
+		required: false,
+		col
+	}))
+}
+
+export function getTableFields (fields: Column[] = []) {
+	return fields.map(item => deepMerge(getComponentBaseField(item), {
+		prop: toCamelCase(item.name),
+	}))
 }
 
 export function is(val: unknown, type: string) {
@@ -278,9 +301,6 @@ const other = {
 	},
 	toCamelCase: (str: string) => {
 		return toCamelCase(str);
-	},
-	getFormConfigByFields (fields: Column[]) {
-		return getFormConfigByFields(fields);
 	},
 	deepMerge (src: any = {}, ...targets: Array<any>) {
 		return deepMerge(src, ...targets)

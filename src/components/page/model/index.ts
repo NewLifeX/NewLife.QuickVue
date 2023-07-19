@@ -44,3 +44,14 @@ export interface EventSettingRef {
 export interface EventSettingProps {
 	columns?: Array<({ in?: ColumnKind | Array<ColumnKind> } & TableColumn) | ({ in?: ColumnKind | Array<ColumnKind> } & ColumnConfig)>
 }
+
+export interface ProvidePage {
+	tableColumns: Ref<TableColumn[]>;
+	searchColumns: Ref<ColumnConfig[]>;
+	editColumns: Ref<ColumnConfig[]>;
+	addColumns: Ref<ColumnConfig[]>;
+	detailColumns: Ref<ColumnConfig[]>;
+	searchForm: Ref<EmptyObjectType>;
+	infoForm: Ref<EmptyObjectType>;
+	newSettings: EventSettingProps;
+}

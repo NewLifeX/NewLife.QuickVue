@@ -1,5 +1,5 @@
 <template>
-  <Page @setting="setting">
+  <Page>
     <template #mail>
       测试
     </template>
@@ -9,16 +9,16 @@
 <script setup lang="ts">
 import usePageSetting from '/@/hook/usePageSetting'
 import { ColumnKind, usePageApi } from '/@/api/page';
-const { setting, columns, forms } = usePageSetting({
+const { columns, forms } = usePageSetting({
   columns: [
-    {
-      in: ColumnKind.ADD,
-      prop: 'sex',
-      component: 'radioGroup',
-      props: {
-        options: [{ id: 1, name: '男' }, { id: 2, name: '女' }]
-      },
-    },
+    // {
+    //   in: ColumnKind.ADD,
+    //   prop: 'sex',
+    //   component: 'radioGroup',
+    //   props: {
+    //     options: [{ id: 1, name: '男' }, { id: 2, name: '女' }]
+    //   },
+    // },
     // {
     //   in: [ColumnKind.SEARCH, ColumnKind.LIST, ColumnKind.ADD],
     //   prop: 'mail',

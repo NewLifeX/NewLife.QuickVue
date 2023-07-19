@@ -66,5 +66,28 @@ export function usePageApi() {
 				}
 			});
 		},
+		lookUp: (codes: string) => {
+			return request<{ [k in string]: EmptyObjectType[] }>({
+				url: '/Cube/Lookup',
+				method: 'get',
+				params: {
+					codes
+				}
+			});
+		},
+		upload: (data: { r: string, file: File }) => {
+			// console.log('upload')
+			const formData = new FormData();
+			formData.append('r', data.r);
+			formData.append('file', data.file);
+			return request<{ [k in string]: EmptyObjectType[] }>({
+				url: '/Admin/File/Upload',
+				method: 'post',
+				headers: {
+					"Content-Type": 'multipart/form-data;charset=UTF-8'
+				},
+				params: formData
+			});
+		}
 	};
 }

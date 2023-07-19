@@ -26,7 +26,7 @@ export function useUserApi() {
 		},
 		info: () => {
 			return request<UserInfo>({
-				url: '/Admin/User/Info/',
+				url: '/Admin/User/Info',
 				method: 'get'
 			});
 		},
