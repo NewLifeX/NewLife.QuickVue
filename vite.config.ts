@@ -30,6 +30,10 @@ const viteConfig = defineConfig((mode: ConfigEnv) => {
 			proxy: {
 				'/base-api': {
 					target: 'https://cube3.newlifex.com',
+<<<<<<< HEAD
+=======
+					// target: 'http://127.0.0.1:5000',
+>>>>>>> a8cd0c4ac7ef5a213093e3fd1488aab44f403480
 					ws: true,
 					changeOrigin: true,
 					rewrite: (path) => path.replace(/^\/base-api/, ''),

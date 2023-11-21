@@ -16,7 +16,13 @@ export const useUserInfo = defineStore('userInfo', {
 			time: 0,
 			roles: [],
 			authBtnList: [],
-		},
+			displayName: '',
+			email: '',
+			phone: '',
+			RoleName: '',
+			lastLoginIP: '',
+			lastLoginTime: 0,
+},
 	}),
 	actions: {
 		async setUserInfos() {
@@ -41,6 +47,12 @@ export const useUserInfo = defineStore('userInfo', {
 						time: new Date().getTime(),
 						// roles: [],
 						authBtnList: defaultBtnRoles,
+						displayName: res.data.displayName,
+						email: res.data.mail,
+						phone: res.data.mobile,
+						RoleName: res.data.roleName,
+						lastLoginIP: res.data.lastLoginIP,
+						lastLoginTime: res.data.lastLogin,
 					};
 					resolve(userInfos);
 				})
