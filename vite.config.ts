@@ -52,7 +52,6 @@ const viteConfig = defineConfig((mode: ConfigEnv) => {
 				},
 			},
 		},
-		
 		css: { preprocessorOptions: { css: { charset: false } } },
 		define: {
 			__VUE_I18N_LEGACY_API__: JSON.stringify(false),
