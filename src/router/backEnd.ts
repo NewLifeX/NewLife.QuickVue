@@ -219,7 +219,7 @@ export function backEndComponent(routes: Menu[]): Array<RouteRecordRaw> {
 			meta: {
 				title: item.displayName,
 				isLink: "",
-				isHide: false,
+				isHide: !item.visible,
 				isKeepAlive: true,
 				isAffix: false,
 				isIframe: item.newWindow,

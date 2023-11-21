@@ -291,6 +291,8 @@ declare type WorkflowDrawerState<T = any> = {
 declare type TableDemoPageType = {
 	pageIndex: number;
 	pageSize: number;
+	sort: string;
+	desc: boolean;
 };
 
 declare type TableSearchType = {

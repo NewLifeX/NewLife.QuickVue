@@ -19,14 +19,16 @@ export const useEnumOptions = defineStore('enumOptions', {
   }),
 	actions: {
 		async setOptions(type: string) {
-			if (!this[type]) {
+			if (!this.options[type]) {
         this[type] = [];
-        usePageApi().lookUp(type).then(res => {
+        return usePageApi().lookUp(type).then(res => {
           this.options[type] = res.data[toCamelCase(type)]
+          return this.options[type]
         }).catch(() => {
           this.options[type] = undefined
         })
       }
+      return Promise.resolve(this.options[type])
 		},
 	},
 });

@@ -1,4 +1,5 @@
 import type { PropType, ExtractPropTypes } from 'vue';
+import { Ref } from 'vue';
 export const optionProps = {
   options: {
     type: Object as PropType<Array<EmptyObjectType>>,
@@ -26,3 +27,8 @@ export const optionProps = {
   }
 };
 export type OptionProps = ExtractPropTypes<typeof optionProps >;
+
+export type OptionEmits = {
+  (e: 'optionRequestAfter', options: Ref<EmptyArrayType>): void;
+  (e: 'optionRequestBefore', options: Ref<EmptyArrayType>): void;
+}

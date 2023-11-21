@@ -34,12 +34,23 @@ export function usePageApi() {
 				params
 			});
 		},
-		getTableDetail: <T extends {}>(type: string, id: number) => {
+		getTableDetail: <T extends {}>(type: string, id: number, data?: EmptyObjectType) => {
 			return request<T>({
 				url: type + '/Detail',
 				method: 'get',
 				params: {
-					id
+					id,
+					...data
+				}
+			});
+		},
+		getTableDetailByUrl: <T extends {}>(url: string, id: number, data?: EmptyObjectType) => {
+			return request<T>({
+				url: url,
+				method: 'get',
+				params: {
+					id,
+					...data
 				}
 			});
 		},
@@ -76,17 +87,18 @@ export function usePageApi() {
 			});
 		},
 		upload: (data: { r: string, file: File }) => {
-			// console.log('upload')
 			const formData = new FormData();
-			formData.append('r', data.r);
 			formData.append('file', data.file);
 			return request<{ [k in string]: EmptyObjectType[] }>({
-				url: '/Admin/File/Upload',
+				url: '/Admin/File/UploadLayui',
 				method: 'post',
 				headers: {
-					"Content-Type": 'multipart/form-data;charset=UTF-8'
+					"Content-Type": 'multipart/form-data'
 				},
-				params: formData
+				data: formData,
+				params: {
+					r: 'user'
+				}
 			});
 		}
 	};

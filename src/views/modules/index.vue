@@ -1,6 +1,3 @@
 <template>
-  <Page></Page>
+	<Page></Page>
 </template>
-
-<script setup lang="ts">
-</script>

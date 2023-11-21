@@ -1,10 +1,10 @@
 <template>
   <component :is="layoutComponent" v-bind="layoutBind" v-model="layoutVisible" class="form-wrapper" :class="{'h-full': wrapper !== 'dialog'}">
     <div class="h-full flex flex-col overflow-auto form-body">
-      <el-tabs type="border-card" :class="{'border-t-0': wrapper === 'drawer'}" v-model="activeName" v-if="tabs.length">
+      <el-tabs type="border-card" :class="{'border-t-0': wrapper === 'drawer'}" v-model="activeName" v-if="tabs.length > 1">
         <el-tab-pane :name="item" :key="item" v-for="item in tabs">
           <template #label>
-            {{ item || '常规' }}
+            {{ item || DEFAULT_TAB_NAME }}
           </template>
         </el-tab-pane>
       </el-tabs>
@@ -12,17 +12,21 @@
         <el-form ref="formEl" :model="formValue" size="default" label-width="120px" class="table-form">
           <el-row>
             <template v-for="(item, key) in config" :key="key">
-              <el-col v-bind="getColBind(item.col)" v-if="item.if === undefined ? true : item.if" v-show="getItemVShow(item)">
-                <el-form-item
-                  class="form-item"
-                  :label="item.label"
-                  :prop="item.prop"
-                  :rules="[{ required: item.required, message: `${item.label}不能为空`, trigger: item.component === 'input' || item.component === 'inputNumber' ? 'blur' : 'change' }]"
-                  >
-                  <slot v-if="item.slot" :name="item.slot" :model="formValue" :prop="item.prop"></slot>
-                  <component v-else v-bind="item.props" v-model="formValue[item.prop]" :is="forms[item.component || 'input']" @change="onChange"></component>
-                </el-form-item>
-              </el-col>
+              <template v-if="item.if === undefined || (typeof item.if === 'function' ? item.if(formValue) : item.if)">
+                <el-divider v-if="item.component === 'divider'" v-show="getItemVShow(item, formValue)" v-bind="item.props">{{ item.label }}</el-divider>
+                <el-col v-bind="getColBind(item.col)" v-else v-show="getItemVShow(item, formValue)">
+                  <el-form-item
+                    class="form-item"
+                    :label="item.label"
+                    :prop="item.prop.toString()"
+                    :rules="[{ required: item.required, message: `${item.label}不能为空`, trigger: item.component === 'input' || item.component === 'inputNumber' ? 'blur' : 'change' }]"
+                    >
+                    <slot v-if="item.slot" :name="item.slot" :model="formValue" :prop="item.prop"></slot>
+                    <cascader v-else-if="Array.isArray(item.prop) && item.component === 'cascader'" v-bind="item.props" v-model="formValue" :modelKeys="item.prop" @change="onChange"></cascader>
+                    <component v-else v-bind="item.props" :model-value="getFormValueByKey(formValue, item.prop as string)" @update:model-value="(val: any) => setFormValueByKey(val, item.prop as string)" :is="forms[item.component || 'input']" @change="onChange"></component>
+                  </el-form-item>
+                </el-col>
+              </template>
             </template>
             <slot name="form-after"></slot>
           </el-row>
@@ -49,6 +53,10 @@ import useFormWrapper from './hooks/useFormWrapper';
 import useForm from './hooks/useForm';
 import { EditWrapper } from '../page/model';
 import { computed, ref, watch } from 'vue';
+import Cascader from '../../components/cascader/index.vue';
+import { isObjTrue } from '/@/utils/other';
+
+const DEFAULT_TAB_NAME = '常规'
 
 interface Props {
   wrapper?: EditWrapper;
@@ -82,7 +90,14 @@ const { formEl, formValue, onChange, getColBind } = useForm(props, emits)
 
 const activeName = ref('');
 const tabs = computed(() => {
-  let groups = props.groups || [...new Set(props.config.map(item => item.group))]
+  let groups = props.groups || [
+    ...new Set(
+      props.config.filter(
+        item => (typeof item.if === 'function' ? item.if(formValue.value) : isObjTrue(item.if)) && (typeof item.show === 'function' ? item.show(formValue.value) : isObjTrue(item.show))
+      ).map(item => item.group || DEFAULT_TAB_NAME)
+    )
+  ]
+  // console.log('groups', groups)
   if (!groups.length || (groups.length === 1 && !groups[0])) {
     return []
   }
@@ -102,10 +117,13 @@ watch(tabs, (val) => {
 //   activeName.value = tabs.value[tabs.value.findIndex(name => name === activeName.value) - 1]!
 // }
 
-const getItemVShow = (item: ColumnConfig) => {
-  const show = item.show === undefined ? true : item.show
-  return tabs.value.length ? item.group === activeName.value && show : show
+const getItemVShow = (item: ColumnConfig, formData: EmptyObjectType) => {
+  // const show = item.show === undefined ? true : item.show
+  const show = typeof item.show === 'function' ? item.show(formData) : isObjTrue(item.show)
+  const group = item.group || ""
+  return tabs.value.length ? (group === activeName.value || (!group && activeName.value === DEFAULT_TAB_NAME)) && show : show
 }
+
 const submit = async () => {
   if (!formEl.value) return
   await formEl.value.validate((valid, fields) => {
@@ -113,14 +131,28 @@ const submit = async () => {
       emits('submit', formValue.value)
       layoutVisible.value = false;
     } else {
-      // console.log('error submit!', fields)
-      ElMessage.error(fields)
+      ElMessage.error(Object.values(fields || {}).reduce((total, item) => total.concat(item), []).map(item => item.message).join('\n'))
     }
   })
 }
 const cancel = () => {
   layoutVisible.value = false;
   emits('cancel')
+}
+
+const getFormValueByKey = (value: EmptyObjectType, key: string) => {
+  return key.split('.').reduce((total, key) => total ? total[key] : undefined, value)
+}
+const setFormValueByKey = (val: any, key: string) => {
+  let keys = key.split('.')
+  keys.reduce((total, key, i) => {
+    if (i === keys.length - 1) {
+      total[key] = val
+    } else if (!total[key]) {
+      total[key] = {}
+    }
+    return total[key] 
+  }, formValue.value)
 }
 defineExpose({
   formEl

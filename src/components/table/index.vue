@@ -8,29 +8,33 @@
 				<slot :name="item.slot" :model="data.model" :prop="data.prop"></slot>
 			</template>
 		</Search>
+		<slot name="table-top"></slot>
 		<el-table
+			style="width: 100%"
+			row-key="id"
+			stripe
 			:data="data"
 			:border="setBorder"
 			v-bind="$attrs"
-			row-key="id"
-			stripe
-			style="width: 100%"
-			v-loading="config.loading"
-			@selection-change="onSelectionChange">
-			<el-table-column type="selection" :reserve-selection="true" width="40" fixed="left" v-if="config.isSelection && tableColumns.length" />
-			<el-table-column type="index" label="序号" width="60" v-if="config.isSerialNo && tableColumns.length" />
+			v-loading="loading"
+			@selection-change="onSelectionChange"
+			@sort-change="onChangeSort">
+			<el-table-column type="selection" :reserve-selection="true" width="40" fixed="left" v-if="isSelection && tableColumns.length" />
+			<el-table-column type="index" label="序号" width="60" v-if="isSerialNo && tableColumns.length" />
 			<template v-for="(item, index) in tableColumns" :key="index">
 				<el-table-column
 					show-overflow-tooltip
 					:prop="item.prop"
 					:width="item.width"
 					:label="item.label"
+					:sortable="item.sort ? 'custom' : false"
 					v-if="(item.if === undefined || item.if) && (item.isCheck === undefined || item.isCheck)"
 				>
 					<template v-slot="scope">
 						<slot v-if="item.slot" :name="item.slot" :scope="scope" :model="scope.row" :prop="item.prop"></slot>
 						<template v-else-if="item.component === 'upload'">
-							<img :src="scope.row[item.prop]" width="50px" height="50px" />
+							<!-- <img :src="scope.row[item.prop]" width="50px" height="50px" /> -->
+							<el-image :src="imgBaseUrl + scope.row[item.prop]" class="w-12 h-12 rounded" :preview-src-list="[imgBaseUrl + scope.row[item.prop]]" preview-teleported fit="fill"></el-image>
 						</template>
 						<template v-else-if="item.component === 'switch'">
 							<el-tag :type="scope.row[item.prop] ? '' : 'info'" effect="dark">
@@ -48,17 +52,19 @@
 				</el-table-column>
 			</template>
 			<el-table-column
-				v-if="config.isOperate && tableColumns.length && auths(getBtnAuth(Auth.SET, Auth.DEL))"
+				v-if="isOperate && tableColumns.length && auths(getBtnAuth(Auth.SET, Auth.DEL))"
 				label="操作"
 				:width="operateWidth"
 				fixed="right">
 				<template v-slot="scope">
+					<slot name="table-handle-before" :scope="scope"></slot>
 					<el-button v-auths="getBtnAuth(Auth.SET)" text type="primary" @click="onEdit(scope.row)">修改</el-button>
 					<el-popconfirm title="确定删除吗？" @confirm="onDel(scope.row)">
 						<template #reference>
 							<el-button v-auths="getBtnAuth(Auth.DEL)" text type="danger">删除</el-button>
 						</template>
 					</el-popconfirm>
+					<slot name="table-handle-after" :scope="scope"></slot>
 				</template>
 			</el-table-column>
 			<template #empty>
@@ -73,7 +79,7 @@
 				v-model:page-size="state.page.pageSize"
 				:pager-count="5"
 				:page-sizes="[10, 20, 30]"
-				:total="config.total"
+				:total="total"
 				layout="total, sizes, prev, pager, next, jumper"
 				background
 				@size-change="onHandleSizeChange"
@@ -138,7 +144,7 @@
 
 <script setup lang="ts" name="netxTable">
 import { reactive, computed, nextTick, watch, Ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ColumnSortHandler, ColumnSortParams, ElMessage } from 'element-plus';
 import table2excel from 'js-table2excel';
 import { storeToRefs } from 'pinia';
 import { useThemeConfig } from '/@/stores/themeConfig';
@@ -154,33 +160,42 @@ import { useEnumOptions } from '/@/stores/enumOptions';
 interface Param {
 	pageIndex?: number;
 	pageSize?: number;
+	sort?: string,
+	desc?: boolean,
 }
-interface Props {
+export interface Props {
+	total?: number;
+  loading?: boolean;
+  isBorder?: boolean;
+  isSerialNo?: boolean;
+  isSelection?: boolean;
+  isOperate?: boolean;
+	operateWidth?: number;
 	authId?: number;
 	data: EmptyObjectType[];
 	columns: TableColumn[];
-	config: TableConfigType;
 	search: ColumnConfig[];
 	param: Param;
 	pagerVisible: boolean;
 	searchData: EmptyObjectType;
 }
+const imgBaseUrl = import.meta.env.VITE_IMG_BASE_URL
 // 定义父组件传过来的值
 const props = withDefaults(defineProps<Props>(), {
+	total: 0, // 列表总数
+	loading: true, // loading 加载
+	isBorder: false, // 是否显示表格边框
+	isSerialNo: false, // 是否显示表格序号
+	isSelection: true, // 是否显示表格多选
+	isOperate: true, // 是否显示表格操作栏
 	data: () => [],
 	columns: () => [],
-	config: () => ({
-		total: 0, // 列表总数
-		loading: true, // loading 加载
-		isBorder: false, // 是否显示表格边框
-		isSerialNo: false, // 是否显示表格序号
-		isSelection: true, // 是否显示表格多选
-		isOperate: true, // 是否显示表格操作栏
-	}),
 	search: () => [],
 	param: () => ({
 		pageIndex: 1,
 		pageSize: 10,
+		sort: '',
+		desc: false,
 	}),
 	pagerVisible: true,
 	searchData: () => ({})
@@ -189,8 +204,8 @@ const props = withDefaults(defineProps<Props>(), {
 const { options } = useEnumOptions()
 
 const operateWidth = computed(() => {
-	if (props.config.operateWidth)
-		return props.config.operateWidth
+	if (props.operateWidth)
+		return props.operateWidth
 	return (auths(getBtnAuth(Auth.SET)) ? 55 : 0) + (auths(getBtnAuth(Auth.DEL)) ? 55 : 0)
 })
 
@@ -219,11 +234,14 @@ const searchDataRef = computed({
 
 // 设置边框显示/隐藏
 const setBorder = computed(() => {
-	return props.config.isBorder ? true : false;
+	return props.isBorder ? true : false;
 });
 // 获取父组件 配置项（必传）
 const getConfig = computed(() => {
-	return props.config;
+	return {
+		isSerialNo: props.isSerialNo,
+		isSelection: props.isSelection,
+	};
 });
 // 设置 tool columns 数据
 // const setHeader = computed(() => {
@@ -291,6 +309,11 @@ const onImportTable = () => {
 const onRefreshTable = () => {
 	emit('search', state.page);
 };
+const onChangeSort = (data: { prop: string; order: 'descending' | 'ascending' | null }) => {
+	state.page.sort = data.order ? data.prop : '';
+	state.page.desc = data.order === 'descending';
+	emit('search', state.page);
+}
 // 设置
 const onSetTable = () => {
 	nextTick(() => {

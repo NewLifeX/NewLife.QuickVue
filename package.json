@@ -34,7 +34,7 @@
 		"sortablejs": "^1.15.0",
 		"splitpanes": "^3.1.5",
 		"ts-enum-util": "^4.0.2",
-		"vue": "^3.2.47",
+		"vue": "^3.3.8",
 		"vue-clipboard3": "^2.0.0",
 		"vue-grid-layout": "^3.0.0-beta1",
 		"vue-i18n": "^9.2.2",

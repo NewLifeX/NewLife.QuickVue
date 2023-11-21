@@ -27,6 +27,6 @@ export default function useForm (props: FormProps, emits: FormEmits) {
     formEl,
     formValue,
     onChange,
-    getColBind
+    getColBind,
   }
 }

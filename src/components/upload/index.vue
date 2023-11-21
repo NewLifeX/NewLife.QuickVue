@@ -1,58 +1,66 @@
 <template>
   <el-upload
     class="avatar-uploader"
-    :http-request="request"
-    :show-file-list="fileListVisible"
+    :action="action"
+    :show-file-list="false"
     :on-success="handleAvatarSuccess"
     :before-upload="beforeAvatarUpload"
   >
-    <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+    <img v-if="imageUrl" :src="baseUrl + imageUrl" class="avatar" />
     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
   </el-upload>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { ElMessage, UploadRequestOptions } from 'element-plus'
+import { computed, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-
 import type { UploadProps } from 'element-plus'
-import { Session } from '/@/utils/storage';
-import { usePageApi } from '/@/api/page';
 
 interface Props {
+  modelValue?: string;
   maxSize?: number;
+  limit?: number;
+  url?: string;
+  resultKey?: string;
 }
-const headers = {
-  Authorization: `${Session.get('token')}`,
-  // 'Content-Type': 'multipart/form-data'
+interface Emits {
+  (e: 'update:modelValue', val: string): void
 }
-const props = defineProps<Props>()
 
-const action = import.meta.env.VITE_API_URL + '/Admin/File/Upload'
+const props = withDefaults(defineProps<Props>(), {
+  limit: 1
+})
+const emits = defineEmits<Emits>()
 
-const imageUrl = ref('')
-const fileListVisible = ref(false)
+const action = import.meta.env.VITE_API_URL + props.url
+const baseUrl = import.meta.env.VITE_IMG_BASE_URL
 
-const { upload } = usePageApi()
-const request = (options: UploadRequestOptions) => {
-  return upload({ r: 'user', file: options.file })
-}
+const imageUrl = computed({
+  get () {
+    return props.modelValue
+  },
+  set (val) {
+    emits('update:modelValue', val || '')
+  }
+})
+// const imageUrl = ref('')
 
 const handleAvatarSuccess: UploadProps['onSuccess'] = (
   response,
   uploadFile
 ) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+  // console.log('response', response)
+  // imageUrl.value = URL.createObjectURL(uploadFile.raw!)
+  imageUrl.value = response.data.shortPath
 }
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
-  // if (rawFile.type !== 'image/jpeg') {
-  //   ElMessage.error('Avatar picture must be JPG format!')
-  //   return false
-  // } else 
-  if (props.maxSize && rawFile.size / 1024 / 1024 > props.maxSize) {
-    ElMessage.error('最大不超过 2MB!')
+  if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/jpg' && rawFile.type !== 'image/png') {
+    ElMessage.error('图片格式不支持!')
+    return false  
+  } else if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error('Avatar picture size can not exceed 2MB!')
     return false
   }
   return true
@@ -61,10 +69,9 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 
 <style scoped>
 .avatar-uploader .avatar {
-  width: 100px;
-  height: 100px;
+  width: 178px;
+  height: 178px;
   display: block;
-  object-fit: cover;
 }
 </style>
 
@@ -85,8 +92,8 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 .el-icon.avatar-uploader-icon {
   font-size: 28px;
   color: #8c939d;
-  width: 100px;
-  height: 100px;
+  width: 178px;
+  height: 178px;
   text-align: center;
 }
 </style>

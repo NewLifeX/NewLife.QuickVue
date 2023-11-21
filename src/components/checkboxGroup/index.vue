@@ -4,13 +4,13 @@
       {{item[props.labelKey]}}
     </el-checkbox>
   </el-checkbox-group>
-  
 </template>
 
 <script setup lang="ts">
 import useOptions from '/@/hook/useOptions';
-import { optionProps } from '/@/utils/optionProps';
+import { OptionEmits, optionProps } from '/@/utils/optionProps';
 
 const props = defineProps(optionProps);
-const { myOptions } = useOptions(props)
+const emits = defineEmits<OptionEmits>()
+const { myOptions } = useOptions(props, emits)
 </script>

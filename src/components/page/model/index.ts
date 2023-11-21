@@ -1,6 +1,7 @@
+import { TableProps } from "element-plus";
 import { Ref } from "vue";
 import { ColumnConfig } from "../../form/model/form";
-import { TableColumn } from "../../table/type";
+import { TableColumn, TableMoreProps } from "../../table/type";
 import { ColumnKind } from "/@/api/page";
 
 export type EditWrapper = 'div' | 'dialog' | 'drawer';
@@ -33,16 +34,58 @@ export interface EventSettingRef {
 	formData?: Ref<EmptyObjectType>;
 }
 
-// type EventSettingPropsList = {
+// type UsePagePropsList = {
 // 	in: ColumnKind.LIST
 // } & TableColumn
-// type EventSettingPropsForm = {
+// type UsePagePropsForm = {
 // 	in: ColumnKind.ADD | ColumnKind.DETAIL | ColumnKind.EDIT | ColumnKind.SEARCH
 // } & ColumnConfig
-// type EventSettingPropsCommon = ({in?: ColumnKind[]} & TableColumn) | ({ in?: ColumnKind[]} & ColumnConfig);
+// type UsePagePropsCommon = ({in?: ColumnKind[]} & TableColumn) | ({ in?: ColumnKind[]} & ColumnConfig);
 
-export interface EventSettingProps {
-	columns?: Array<({ in?: ColumnKind | Array<ColumnKind> } & TableColumn) | ({ in?: ColumnKind | Array<ColumnKind> } & ColumnConfig)>
+export interface ColumnIn {
+	in?: ColumnKind | Array<ColumnKind>;
+}
+export interface MoreProp extends ColumnIn {
+	/**参数名 */
+	prop: string | Array<string>;
+}
+export interface UsePageProps {
+	/** 表单配置 */
+	columns?: Array<(Omit<TableColumn, 'prop'> & MoreProp) | (Omit<ColumnConfig, 'prop'> & MoreProp)>;
+	/** 表格配置 */
+	tableConfig?: Partial<TableProps<EmptyObjectType>> & Partial<TableMoreProps> & {
+		api?: (...props: EmptyArrayType) => Promise<EmptyObjectType | Array<EmptyObjectType>>;
+		url?: string;
+		requestProps?: EmptyObjectType;
+		handleWidth?: number;
+	},
+	detailConfig?: {
+		api?: (...props: EmptyArrayType) => Promise<EmptyObjectType | Array<EmptyObjectType>>;
+		url?: string;
+		requestProps?: EmptyObjectType | ((row: EmptyObjectType) => EmptyObjectType);
+	},
+	addConfig?: {
+		api?: (...props: EmptyArrayType) => Promise<EmptyObjectType | Array<EmptyObjectType>>;
+		url?: string;
+		requestProps?: EmptyObjectType;
+	},
+	editConfig?: {
+		api?: (...props: EmptyArrayType) => Promise<EmptyObjectType | Array<EmptyObjectType>>;
+		url?: string;
+		requestProps?: EmptyObjectType;
+	},
+	onAddClick?: () => void;
+	onAddBefore?: (data: EmptyObjectType, addFun: Function) => void;
+	onAddAfter?: (data: EmptyObjectType) => void;
+	onEditClick?: (data: EmptyObjectType) => void;
+	onEditBefore?: (data: EmptyObjectType, editFun: Function) => void;
+	onEditAfter?: (data: EmptyObjectType) => void;
+	onDelBefore?: (data: EmptyObjectType, delFun: Function) => void;
+	onDelAfter?: (data: EmptyObjectType) => void;
+}
+
+export interface PageHandle {
+	reload: () => void;
 }
 
 export interface ProvidePage {
@@ -53,5 +96,6 @@ export interface ProvidePage {
 	detailColumns: Ref<ColumnConfig[]>;
 	searchForm: Ref<EmptyObjectType>;
 	infoForm: Ref<EmptyObjectType>;
-	newSettings: EventSettingProps;
+	pageProps: UsePageProps;
+	handle: PageHandle,
 }

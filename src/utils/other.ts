@@ -200,7 +200,7 @@ export function getComponentBaseField (item: Column) {
 		String: 'input',
 		Boolean: 'switch',
 		DateTime: 'datePicker',
-	}
+	}	
 	const contents = {
 		mail: 'input',
 		mobile: 'input',
@@ -258,7 +258,78 @@ export function deepMerge<T = any>(src: any = {}, ...targets: Array<any>): T {
   });
   return src;
 }
+export function decomposePowerOfTwo (num: number) {
+	let powers = [];
+	let n = 0;
+	while(num > 0) {
+		if ((num & 1) === 1) {
+			// 如果当前位是1，就添加对应的2的n次幂
+			powers.push(Math.pow(2, n));
+		}
+		num >>= 1; // 右移一位
+		n++;
+	}
+	return powers;
+}
 
+export function isObjTrue (prop?: boolean) {
+	return prop || (prop === undefined)
+}
+export function toSomeLevelJSON(obj: EmptyObjectType) {
+  const result = {};
+
+  for (const key in obj) {
+    const keys = key.split('.');
+    let currentLevel = result;
+
+    for (let i = 0; i < keys.length; i++) {
+      const subKey = keys[i];
+      if (!currentLevel[subKey]) {
+        if (i === keys.length - 1) {
+          currentLevel[subKey] = obj[key];
+        } else {
+          currentLevel[subKey] = {};
+        }
+      }
+      currentLevel = currentLevel[subKey];
+    }
+  }
+	
+  return result;
+}
+export function toOneLevelJSON(obj: EmptyObjectType, parentKey = '') {
+	const result = {};
+
+	for (const key in obj) {
+		const newKey = parentKey ? `${parentKey}.${key}` : key;
+		if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+			const nestedObj = toOneLevelJSON(obj[key], newKey);
+			Object.assign(result, nestedObj);
+		} else {
+			result[newKey] = obj[key];
+		}
+	}
+
+	return result;
+}
+export function assignJSON(target: EmptyObjectType, source: EmptyObjectType) {
+  for (const key in target) {
+    if (!(key in source)) {
+      delete target[key];
+    }
+  }
+
+  for (const key in source) {
+    if (typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      if (!target[key]) {
+        target[key] = {};
+      }
+      assignJSON(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+}
 /**
  * 统一批量导出
  * @method elSvg 导出全局注册 element plus svg 图标
@@ -304,7 +375,12 @@ const other = {
 	},
 	deepMerge (src: any = {}, ...targets: Array<any>) {
 		return deepMerge(src, ...targets)
-	}
+	},
+	isObjTrue,
+	decomposePowerOfTwo,
+	toSomeLevelJSON,
+	toOneLevelJSON,
+	assignJSON
 };
 
 // 统一批量导出

@@ -1,5 +1,8 @@
 @import 'mixins/index.scss';
 
+.el-upload--picture-card {
+	--el-upload-picture-card-size: 126px !important;
+}
 /* Button 按钮
 ------------------------------- */
 // 第三方字体图标大小

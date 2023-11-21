@@ -36,6 +36,7 @@
 import { reactive, ref, onMounted, computed } from 'vue';
 import Form from '/@/components/form/index.vue'
 import { ColumnConfig } from '../form/model/form';
+import { isObjTrue } from '/@/utils/other';
 interface Props {
 	search: ColumnConfig[];
 	modelValue: EmptyObjectType;
@@ -60,7 +61,10 @@ const formData = computed({
 	}
 })
 const config = computed(() => {
-	return props.search.map((item, index) => ({
+	return props.search.filter(item => 
+		(typeof item.if === 'function' ? item.if(formData.value) : isObjTrue(item.if)) &&
+		(typeof item.show === 'function' ? item.show(formData.value) : isObjTrue(item.show))
+	).map((item, index) => ({
 		...item,
 		show: index === 0 || state.isToggle
 	}))
@@ -87,7 +91,7 @@ const onReset = () => {
 // 初始化 form 字段，取自父组件 search.prop
 const initFormField = () => {
 	if (props.search.length <= 0) return false;
-	props.search.forEach((v) => (formData.value[v.prop] = ''));
+	props.search.forEach((v) => (formData.value[v.prop.toString()] = ''));
 };
 // 页面加载时
 onMounted(() => {
