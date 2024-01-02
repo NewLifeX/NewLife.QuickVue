@@ -41,9 +41,9 @@ const { columns, forms } = usePage({
 			prop: 'avatar',
 			component: 'upload',
 			props: {
-				url: '/Projects/Work/UploadFileService',
+				url: '/api/Upload/UploadFiles',
 				data: {
-					directory: 'works'
+					proName: 'avatar'
 				}
 			}
 		}
